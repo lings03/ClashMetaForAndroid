@@ -86,6 +86,7 @@ abstract class BaseActivity<D : Design<*>> : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         applyDayNight()
+        applyHighRefreshRate()
 
         launch {
             main()
@@ -185,6 +186,20 @@ abstract class BaseActivity<D : Design<*>> : AppCompatActivity(),
             DarkMode.Auto -> if (config.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) DayNight.Night else DayNight.Day
             DarkMode.ForceLight -> DayNight.Day
             DarkMode.ForceDark -> DayNight.Night
+        }
+    }
+
+    private fun applyHighRefreshRate() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window?.let { win ->
+                val display = win.context.display
+                val maxRefreshMode = display?.supportedModes?.maxByOrNull { it.refreshRate }
+                maxRefreshMode?.let {
+                    win.attributes = win.attributes.apply {
+                        preferredDisplayModeId = it.modeId
+                    }
+                }
+            }
         }
     }
 
